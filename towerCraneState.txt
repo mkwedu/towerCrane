@@ -1,0 +1,1 @@
+a:9:{s:4:"name";s:13:"Tower Crane 1";s:2:"on";b:1;s:11:"towerHeight";i:100;s:8:"armRange";i:50;s:15:"liftingCapacity";i:500;s:16:"powerConsumption";i:100;s:8:"armAngle";i:0;s:15:"trolleyPosition";i:18;s:10:"loadHeight";i:0;}
