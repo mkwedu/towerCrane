@@ -6,7 +6,7 @@ class TowerCrane
     public $towerHeight;
     public $armRange;
     public $liftingCapacity;
-    
+
     private $on = false;
     private $powerConsumption = 0;
     private $armAngle = 0;
@@ -18,9 +18,9 @@ class TowerCrane
      */
     public function __construct()
     {
-        if(file_exists('towerCraneState.txt')) {
+        if (file_exists('towerCraneState.txt')) {
             $array = unserialize(file_get_contents('towerCraneState.txt'));
-            foreach($array as $key => $value) {
+            foreach ($array as $key => $value) {
                 $this->$key = $value;
             }
         }
@@ -46,11 +46,13 @@ class TowerCrane
         file_put_contents('towerCraneState.txt', serialize($array));
     }
 
-    public function __get($name) {
+    public function __get($name)
+    {
         return $this->$name;
     }
 
-    public function __set($name, $value) {
+    public function __set($name, $value)
+    {
         $this->$name = $value;
     }
 
@@ -82,10 +84,15 @@ class TowerCrane
      */
     private function rotateArm($deg)
     {
-        if($this->armAngle + $deg < 360) {
+        if (0 < $this->armAngle + $deg && $this->armAngle + $deg < 360) {
             $this->armAngle += $deg;
+        } else if ($this->armAngle + $deg < 0) {
+            $negativeAngle = abs($this->armAngle + $deg);
+            $this->armAngle = 360 - $negativeAngle;
+        } else if ($this->armAngle + $deg > 360) {
+            $this->armAngle = $this->armAngle + $deg - 360;
         } else {
-            $this->armAngle += $deg - 360;
+            $this->armAngle = 0;
         }
     }
 
@@ -95,7 +102,7 @@ class TowerCrane
      */
     private function moveTrolley($px)
     {
-        if($this->trolleyPosition + $px > $this->armRange) {
+        if ($this->trolleyPosition + $px > $this->armRange) {
             $this->trolleyPosition = $this->armRange;
         } elseif ($this->trolleyPosition + $px < 0) {
             $this->trolleyPosition = 0;
@@ -110,7 +117,13 @@ class TowerCrane
      */
     private function liftLoad($px)
     {
-        $this->loadHeight += $px;
+        if ($this->loadHeight + $px > $this->towerHeight) {
+            $this->loadHeight = $this->towerHeight;
+        } elseif ($this->loadHeight + $px < 0) {
+            $this->loadHeight = 0;
+        } else {
+            $this->loadHeight += $px;
+        }
     }
 
     /**
@@ -143,7 +156,7 @@ class TowerCrane
         if (!$this->on) {
             return "{'error': 'The tower crane is off'}";
         }
-        
+
         // Perform the command
         switch ($command) {
             case 'left':
@@ -162,7 +175,7 @@ class TowerCrane
                 $this->liftLoad(1);
                 break;
             case 'down':
-                $this->lowerLoad(-1);
+                $this->liftLoad(-1);
                 break;
             default:
                 return "{'error': 'Invalid command'}";
@@ -172,13 +185,18 @@ class TowerCrane
     }
 }
 
-// $crane = new TowerCrane();
-// $crane->name = 'Tower Crane 1';
-// $crane->towerHeight = 100;
-// $crane->armRange = 50;
-// $crane->liftingCapacity = 500;
+$crane = new TowerCrane();
+$crane->name = 'Tower Crane 1';
+$crane->towerHeight = 100;
+$crane->armRange = 50;
+$crane->liftingCapacity = 500;
 
-// $crane->turnOn();
+$crane->turnOn();
+
+// $crane->control('right');
+$crane->control('left');
+
+print_r($crane->getState());
 
 // $crane->turnOff();
 // // __destruct
